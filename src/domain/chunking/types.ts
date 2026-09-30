@@ -8,5 +8,6 @@ export interface PolicyChunk {
     effectiveFrom?: string; // ISO date
     effectiveTo?: string | null;
     content: string;
+    embedding?: number[];
     createdAt: Date;
 }
