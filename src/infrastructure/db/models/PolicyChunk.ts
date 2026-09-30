@@ -1,7 +1,9 @@
 import mongoose, { Schema, Document } from "mongoose";
 import type { PolicyChunk } from "../../../domain/chunking/types.js";
 
-export interface PolicyChunkDocument extends PolicyChunk, Document { }
+export interface PolicyChunkDocument extends PolicyChunk, Document {
+    embedding?: number[];
+}
 
 const PolicyChunkSchema = new Schema<PolicyChunkDocument>(
     {
@@ -18,6 +20,7 @@ const PolicyChunkSchema = new Schema<PolicyChunkDocument>(
         effectiveFrom: { type: String },
         effectiveTo: { type: String, default: null },
         content: { type: String, required: true },
+        embedding: { type: [Number], default: undefined }, // vector
         createdAt: { type: Date, default: Date.now },
     },
     {

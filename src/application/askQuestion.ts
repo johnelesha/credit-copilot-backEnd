@@ -1,4 +1,5 @@
 import { searchPolicy } from "../infrastructure/retrieval/searchPolicy.js";
+import { vectorSearch } from "../infrastructure/retrieval/vectorSearch.js";
 
 export interface AskResult {
     answer: string;
@@ -19,18 +20,19 @@ export async function askQuestion(
     question: string,
     policyEdition?: "CP-2024" | "CP-2025",
 ): Promise<AskResult> {
-    const searchOptions: Parameters<typeof searchPolicy>[0] = {
+    const searchOptions: Parameters<typeof vectorSearch>[0] = {
         query: question,
         limit: 5,
+        minScore: 0.55,
     };
 
     if (policyEdition) {
         searchOptions.policyEdition = policyEdition;
     }
 
-    const results = await searchPolicy(searchOptions);
+    const results = await vectorSearch(searchOptions);
 
-    if (results.length === 0 || results[0]?.score === 0) {
+    if (results.length === 0) {
         return {
             answer:
                 "The documents do not contain enough information to answer this question.",

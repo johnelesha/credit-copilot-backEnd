@@ -11,13 +11,15 @@
     "test:watch": "vitest",
     "seed:policy": "tsx src/scripts/seedPolicy.ts",
     "seed:applications": "tsx src/scripts/seedApplications.ts",
-    "seed:all": "tsx src/scripts/seedPolicy.ts && tsx src/scripts/seedApplications.ts"
+    "seed:all": "tsx src/scripts/seedPolicy.ts && tsx src/scripts/seedApplications.ts",
+    "embed:policy": "tsx src/scripts/embedPolicy.ts"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "module",
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
     "bcryptjs": "^3.0.3",
     "cors": "^2.8.6",
     "csv-parse": "^7.0.3",
