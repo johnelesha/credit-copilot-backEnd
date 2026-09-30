@@ -1,16 +1,18 @@
 import express from "express";
-import mongoose from "mongoose";
-import dotenv from "dotenv";
 import cors from "cors";
+import dotenv from "dotenv";
+import { connectDB } from "./infrastructure/db/mongoose.js";
+import mongoose from "mongoose";
+import askRouter from './api/routes/ask.js';
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const MONGODB_URI = process.env.MONGODB_URI;
 
 app.use(cors());
 app.use(express.json());
+app.use('/api', askRouter);
 
 app.get("/health", (_req, res) => {
     res.json({
@@ -21,20 +23,14 @@ app.get("/health", (_req, res) => {
 });
 
 async function start() {
-    if (!MONGODB_URI) {
-        console.error("Missing MONGODB_URI in .env");
-        process.exit(1);
-    }
-
     try {
-        await mongoose.connect(MONGODB_URI);
-        console.log("✅ MongoDB Atlas connected successfully");
+        await connectDB();
 
         app.listen(PORT, () => {
             console.log(`✅ Server running on http://localhost:${PORT}`);
         });
     } catch (error) {
-        console.error("❌ Failed to connect to MongoDB Atlas:", error);
+        console.error("Failed to start server:", error);
         process.exit(1);
     }
 }
