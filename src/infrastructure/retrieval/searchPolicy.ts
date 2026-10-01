@@ -110,8 +110,10 @@ export async function searchPolicy(
     };
   });
 
+  const minScore = Math.max(2, Math.ceil(keywords.length * 0.5));
+
   return results
-    .filter((r) => r.score > 0)
+    .filter((r) => r.score >= minScore)
     .sort((a, b) => b.score - a.score)
     .slice(0, limit);
 }

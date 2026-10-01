@@ -9,6 +9,8 @@ import approvalRouter from "./api/routes/approval.js";
 import { DomainError } from "./domain/errors.js";
 import authRouter from "./api/routes/auth.js";
 // import { requireAuth, requireRole } from "./api/middleware/auth.js";
+import swaggerUi from 'swagger-ui-express';
+import { swaggerSpec } from './config/swagger.js';
 
 dotenv.config();
 
@@ -17,6 +19,7 @@ const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
+app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use("/api", askRouter);
 app.use("/api", assessRouter);
 app.use("/api", approvalRouter);
