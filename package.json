@@ -12,7 +12,8 @@
     "seed:policy": "tsx src/scripts/seedPolicy.ts",
     "seed:applications": "tsx src/scripts/seedApplications.ts",
     "seed:all": "tsx src/scripts/seedPolicy.ts && tsx src/scripts/seedApplications.ts",
-    "embed:policy": "tsx src/scripts/embedPolicy.ts"
+    "embed:policy": "tsx src/scripts/embedPolicy.ts",
+    "seed:users": "tsx src/scripts/seedUsers.ts"
   },
   "keywords": [],
   "author": "",
