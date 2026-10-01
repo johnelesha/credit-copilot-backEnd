@@ -12,7 +12,9 @@
     "seed:policy": "tsx src/scripts/seedPolicy.ts",
     "seed:applications": "tsx src/scripts/seedApplications.ts",
     "seed:all": "tsx src/scripts/seedPolicy.ts && tsx src/scripts/seedApplications.ts",
-    "embed:policy": "tsx src/scripts/embedPolicy.ts"
+    "embed:policy": "tsx src/scripts/embedPolicy.ts",
+    "seed:users": "tsx src/scripts/seedUsers.ts",
+    "eval": "tsx evaluation/run-eval.ts"
   },
   "keywords": [],
   "author": "",
@@ -33,6 +35,8 @@
     "pdf-parse": "^2.4.5",
     "pino": "^10.3.1",
     "pino-http": "^11.0.0",
+    "swagger-jsdoc": "^6.3.0",
+    "swagger-ui-express": "^5.0.1",
     "uuid": "^14.0.2",
     "zod": "^4.6.5"
   },
@@ -45,6 +49,8 @@
     "@types/node": "^26.6.3",
     "@types/pdf-parse": "^1.1.5",
     "@types/supertest": "^7.2.1",
+    "@types/swagger-jsdoc": "^6.0.4",
+    "@types/swagger-ui-express": "^4.1.8",
     "@types/uuid": "^10.0.0",
     "eslint": "^10.11.0",
     "eslint-config-prettier": "^10.1.8",
