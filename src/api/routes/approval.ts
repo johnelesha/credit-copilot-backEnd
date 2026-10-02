@@ -21,6 +21,29 @@ function getRunId(req: Request): string {
     return id;
 }
 
+/**
+ * @openapi
+ * /api/assessments/{runId}/approve:
+ *   post:
+ *     tags: [Approval]
+ *     summary: Approve an assessment (authority limit enforced)
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: runId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Assessment approved
+ *       403:
+ *         description: Role not allowed or authority limit exceeded
+ *       404:
+ *         description: Assessment not found
+ */
+
 router.post(
     "/assessments/:runId/approve",
     requireAuth,
@@ -66,6 +89,38 @@ router.post(
         }
     },
 );
+
+/**
+ * @openapi
+ * /api/assessments/{runId}/reject:
+ *   post:
+ *     tags: [Approval]
+ *     summary: Reject an assessment (comment required)
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: runId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [comment]
+ *             properties:
+ *               comment:
+ *                 type: string
+ *                 example: Customer requested cancellation
+ *     responses:
+ *       200:
+ *         description: Assessment rejected
+ *       400:
+ *         description: Missing comment or invalid status
+ */
 
 router.post(
     "/assessments/:runId/reject",

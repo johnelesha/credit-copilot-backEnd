@@ -13,6 +13,34 @@ const router = Router();
  * Body: { applicationId: "APP-001" }
  * Loads the application from DB and runs the pipeline.
  */
+
+/**
+ * @openapi
+ * /api/assess:
+ *   post:
+ *     tags: [Assessment]
+ *     summary: Run the underwriting pipeline on an application
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [applicationId]
+ *             properties:
+ *               applicationId:
+ *                 type: string
+ *                 example: APP-001
+ *     responses:
+ *       200:
+ *         description: Assessment result (calculation, rules, recommendation)
+ *       401:
+ *         description: Missing or invalid token
+ *       404:
+ *         description: Application not found
+ */
 router.post(
     "/assess",
     requireAuth,
