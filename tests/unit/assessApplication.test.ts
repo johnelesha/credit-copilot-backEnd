@@ -34,6 +34,10 @@ describe("Assessment Pipeline (Fake LLM)", () => {
         );
         expect(result.recommendation).toBe("approve");
         expect(result.status).toBe("pending_approval");
+        expect(result.steps.length).toBeGreaterThanOrEqual(4);
+        expect(result.steps.some((s) => s.name === "validate_application")).toBe(
+            true,
+        );
     });
 
     // ─── 2. Over-age application (APP-003) ─────────────────────────────

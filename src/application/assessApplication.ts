@@ -14,9 +14,9 @@ import {
     InvalidLLMOutput,
 } from "../domain/errors.js";
 import { FakeExtractor } from "../infrastructure/llm/fakeExtractor.js";
-import type { AssessmentResult } from "../domain/assessment.js";
-import type { ExtractedData } from "../domain/application.js";
 import type { ApplicantData } from "../domain/types.js";
+import type { ExtractedData } from "../domain/application.js";
+import type { AssessmentResult, StepLog } from "../domain/assessment.js";
 
 /**
  * Pricing table (simplified for now).
@@ -60,6 +60,7 @@ export interface AssessInput {
 export async function assessApplication(
     input: AssessInput,
 ): Promise<AssessmentResult> {
+    const steps: StepLog[] = [];
     const runId = uuidv4();
 
     // ─── Step 1: Load & validate application ───────────────────────────
@@ -82,15 +83,35 @@ export async function assessApplication(
 
     const form = parsed.data;
 
+    steps.push({
+        step: 1,
+        name: "validate_application",
+        status: "ok",
+        detail: `applicationId=${form.applicationId}`,
+    });
+
     // ─── Step 2: Remove protected attributes ───────────────────────────
     const { cleaned, removed } = stripProtectedAttributes(
         form as Record<string, unknown>,
     );
 
+    steps.push({
+        step: 2,
+        name: "strip_protected_attributes",
+        status: "ok",
+        detail: removed.length ? `removed: ${removed.join(", ")}` : "none",
+    });
+
     // ─── Step 3: Find policy edition ───────────────────────────────────
     const policyEdition = selectPolicyEdition(form.applicationDate);
     const maxDbr = getMaxDbr(policyEdition);
 
+    steps.push({
+        step: 3,
+        name: "select_policy_edition",
+        status: "ok",
+        detail: policyEdition,
+    });
     // ─── Step 4: Extract applicant data (Fake LLM) ─────────────────────
     const extractor = new FakeExtractor();
     let extracted: ExtractedData;
@@ -98,6 +119,12 @@ export async function assessApplication(
     try {
         extracted = await extractor.extract(form.applicationId, input.rawText);
     } catch {
+        steps.push({
+            step: 4,
+            name: "extract_applicant_data",
+            status: "refer",
+            detail: "extraction failed or incomplete",
+        });
         // Missing or invalid extraction → refer to human
         return {
             applicationId: form.applicationId,
@@ -115,6 +142,7 @@ export async function assessApplication(
             status: "refer",
             runId,
             memo: "Extraction failed or incomplete. Refer to human.",
+            steps,
         };
     }
 
@@ -140,8 +168,20 @@ export async function assessApplication(
             extracted.employmentStartDate.quotedText,
             "employmentStartDate",
         );
+        steps.push({
+            step: 4,
+            name: "extract_and_verify",
+            status: "ok",
+            detail: "FakeExtractor + verification",
+        });
     } catch (err) {
         if (err instanceof UnverifiedExtraction) {
+            steps.push({
+                step: 4,
+                name: "extract_and_verify",
+                status: "refer",
+                detail: err.message,
+            });
             return {
                 applicationId: form.applicationId,
                 policyEdition,
@@ -158,6 +198,7 @@ export async function assessApplication(
                 status: "refer",
                 runId,
                 memo: err.message,
+                steps,
             };
         }
         throw err;
@@ -165,6 +206,13 @@ export async function assessApplication(
 
     // ─── Step 5: Retrieve policy clauses (simplified for now) ──────────
     // We already have the rules engine using the correct edition.
+
+    steps.push({
+        step: 5,
+        name: "retrieve_policy_context",
+        status: "ok",
+        detail: `edition=${policyEdition}`,
+    });
 
     // ─── Step 6: Calculate & check rules ───────────────────────────────
     const annualRate = getAnnualRate(
@@ -200,6 +248,18 @@ export async function assessApplication(
     const ruleResults = evaluateRules(applicantData);
     const recommendation = getRecommendation(ruleResults);
 
+    steps.push({
+        step: 6,
+        name: "calculate_and_rules",
+        status:
+            recommendation === "approve"
+                ? "ok"
+                : recommendation === "refer"
+                    ? "refer"
+                    : "fail",
+        detail: `recommendation=${recommendation}`,
+    });
+
     // ─── Step 7: Draft credit memo (simple for now) ────────────────────
     const memo = [
         `Application ${form.applicationId}`,
@@ -212,10 +272,28 @@ export async function assessApplication(
         ...ruleResults.map((r) => `- ${r.rule}: ${r.result} (${r.details ?? ""})`),
     ].join("\n");
 
+    steps.push({
+        step: 7,
+        name: "draft_memo",
+        status: "ok",
+    });
+
     // ─── Step 8: Status ────────────────────────────────────────────────
     let status: AssessmentResult["status"] = "pending_approval";
     if (recommendation === "refer") status = "refer";
     if (recommendation === "decline") status = "decline";
+
+    steps.push({
+        step: 8,
+        name: "set_status",
+        status:
+            status === "pending_approval"
+                ? "ok"
+                : status === "refer"
+                    ? "refer"
+                    : "fail",
+        detail: status,
+    });
 
     return {
         applicationId: form.applicationId,
@@ -231,5 +309,6 @@ export async function assessApplication(
         status,
         runId,
         memo,
+        steps,
     };
 }
