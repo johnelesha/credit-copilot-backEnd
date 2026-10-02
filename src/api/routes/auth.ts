@@ -9,8 +9,8 @@ const router = Router();
  * @openapi
  * /api/auth/login:
  *   post:
- *     summary: Login and get JWT
  *     tags: [Auth]
+ *     summary: Login and receive a JWT
  *     requestBody:
  *       required: true
  *       content:
@@ -19,11 +19,17 @@ const router = Router();
  *             type: object
  *             required: [username, password]
  *             properties:
- *               username: { type: string }
- *               password: { type: string }
+ *               username:
+ *                 type: string
+ *                 example: credit_officer
+ *               password:
+ *                 type: string
+ *                 example: credit123
  *     responses:
  *       200:
- *         description: Token returned
+ *         description: JWT token and user role
+ *       401:
+ *         description: Invalid credentials
  */
 router.post("/auth/login", async (req, res, next) => {
     try {

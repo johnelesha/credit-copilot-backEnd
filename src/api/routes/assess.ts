@@ -4,6 +4,7 @@ import { ApplicationModel } from "../../infrastructure/db/models/Application.js"
 import { AssessmentModel } from "../../infrastructure/db/models/Assessment.js";
 import type { AssessInput } from "../../application/assessApplication.js";
 import { requireAuth, requireRole } from "../middleware/auth.js";
+import { maskSensitiveText } from '../../domain/masking.js';
 
 const router = Router();
 
@@ -11,6 +12,34 @@ const router = Router();
  * POST /api/assess
  * Body: { applicationId: "APP-001" }
  * Loads the application from DB and runs the pipeline.
+ */
+
+/**
+ * @openapi
+ * /api/assess:
+ *   post:
+ *     tags: [Assessment]
+ *     summary: Run the underwriting pipeline on an application
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [applicationId]
+ *             properties:
+ *               applicationId:
+ *                 type: string
+ *                 example: APP-001
+ *     responses:
+ *       200:
+ *         description: Assessment result (calculation, rules, recommendation)
+ *       401:
+ *         description: Missing or invalid token
+ *       404:
+ *         description: Application not found
  */
 router.post(
     "/assess",
@@ -31,6 +60,8 @@ router.post(
                     .json({ error: `Application ${applicationId} not found` });
             }
 
+            const safeRawText = maskSensitiveText(app.rawText);
+
             const input: AssessInput = {
                 applicationId: app.applicationId,
                 applicationDate:
@@ -50,7 +81,7 @@ router.post(
                 )
                     ? false
                     : true,
-                rawText: app.rawText,
+                rawText: safeRawText,
             };
 
             // Only add optional fields when they exist
