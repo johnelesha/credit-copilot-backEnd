@@ -4,6 +4,7 @@ import { ApplicationModel } from "../../infrastructure/db/models/Application.js"
 import { AssessmentModel } from "../../infrastructure/db/models/Assessment.js";
 import type { AssessInput } from "../../application/assessApplication.js";
 import { requireAuth, requireRole } from "../middleware/auth.js";
+import { maskSensitiveText } from '../../domain/masking.js';
 
 const router = Router();
 
@@ -31,6 +32,8 @@ router.post(
                     .json({ error: `Application ${applicationId} not found` });
             }
 
+            const safeRawText = maskSensitiveText(app.rawText);
+
             const input: AssessInput = {
                 applicationId: app.applicationId,
                 applicationDate:
@@ -50,7 +53,7 @@ router.post(
                 )
                     ? false
                     : true,
-                rawText: app.rawText,
+                rawText: safeRawText,
             };
 
             // Only add optional fields when they exist
