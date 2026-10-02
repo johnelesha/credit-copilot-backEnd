@@ -2,6 +2,13 @@ import type { CalculationResult, RuleResult } from "./types.js";
 
 export type AssessmentStatus = "pending_approval" | "refer" | "decline";
 
+export interface StepLog {
+    step: number;
+    name: string;
+    status: "ok" | "refer" | "fail";
+    detail?: string;
+}
+
 export interface AssessmentResult {
     applicationId: string;
     policyEdition: "CP-2024" | "CP-2025";
@@ -13,4 +20,5 @@ export interface AssessmentResult {
     status: AssessmentStatus;
     runId: string;
     memo?: string;
+    steps: StepLog[];
 }
