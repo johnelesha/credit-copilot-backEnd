@@ -81,3 +81,12 @@ npm run seed:policy          Ingest policy docs
 npm run seed:applications    Ingest application packs
 npm run seed:users           Demo users
 npm run seed:all             Policy + applications
+
+
+## Frontend (optional UI)
+
+A separate React app is available for the same API:
+
+- Repo: https://github.com/johnelesha/credit-copilot-frontEnd
+- Run backend on port 3000, then in the frontend folder: `npm install && npm run dev`
+- UI: http://localhost:5173
