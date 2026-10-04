@@ -60,3 +60,31 @@ Day 3–4 pipeline, JWT auth, approval authority limits, evaluation runner, READ
 
 **Lesson:**  
 Always validate provider model availability early; keep domain math in pure tested functions; record real eval numbers honestly.
+
+
+
+### 2026-10-03 / 2026-10-04
+
+**Tool:** Grok  
+**What I asked:**  
+React + Vite + Tailwind frontend structure; login, assess, ask pages; shared layout.
+
+**What AI provided:**  
+- Folder layout and API client pattern  
+- Auth context split (provider / hook)  
+- Assess page with rules, steps, approval actions  
+- Ask page with citations and refusal display  
+
+**What I wrote / changed myself:**  
+- Wired pages to the real backend  
+- Verified APP-001 / APP-003 / authority limit / senior approve in the UI  
+- Replaced free-text application id with a fixed dropdown  
+- Extracted shared Header + Layout  
+- Confirmed only FakeExtractor apps return full calculations (others correctly refer)  
+
+**AI mistakes found:**  
+- Early FormEvent typing warning on React types  
+- Suggested optional form components (LoginForm/AskForm) that were unnecessary for this size of app  
+
+**Lesson:**  
+Keep the UI thin over a working API; fixed demo data (APP-001…005) is clearer than free text for the assessment task.
