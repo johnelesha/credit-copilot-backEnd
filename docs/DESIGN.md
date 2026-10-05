@@ -2,7 +2,9 @@
 
 This document explains the main design decisions for the backend.
 
-Client (Postman / Swagger)
+## Architecture
+
+Client (Postman / Swagger / React UI)
 │
 ▼
 Express API
@@ -27,6 +29,7 @@ Express API
 └── LLM adapters (FakeExtractor; real provider later)
 
 
+Domain code does not import Express, Mongoose, or LLM libraries.
 
 ---
 
@@ -54,7 +57,7 @@ Pure function on application date (no LLM):
 ## Keeping the LLM away from arithmetic
 
 - Instalment, DBR, and maximum eligible amount are computed only in `domain/calculations.ts`
-- Unit tests lock the worked example numbers
+- Unit tests lock the worked example numbers (instalment 8630.39, DBR 0.4210, max eligible under 50% DBR = 382,000)
 - Extracted values are verified against cited text; failure → `UnverifiedExtraction` → refer to human
 
 ---
@@ -67,27 +70,43 @@ Pure function on application date (no LLM):
 
 ---
 
+## How applications enter the system
+
+The five packs are loaded by `npm run seed:applications` into an untrusted store.  
+The API/UI selects an existing `applicationId` (APP-001 … APP-005).  
+Application text is never indexed as policy.
+
+---
+
+## Current LLM usage
+
+- **Live assessment extraction:** `FakeExtractor` (deterministic, no API key, used in tests and demo).
+- **Memo:** built in code from rule results and calculated numbers (not free-form LLM prose).
+- **Embeddings / vector search:** interface exists; live path is keyword search because the free Google key did not expose embedding models (see EVALUATION.md).
+- A real extractor (e.g. Google / OpenAI) would implement the same interface and be selected via env; domain and pipeline code stay unchanged.
+
+---
+
 ## Switching the LLM / embedding provider
 
 1. Implement the existing interface in `infrastructure/llm/`
 2. Add one new adapter class
 3. Change env/config only — no domain or pipeline edits
 
-Vector search is implemented behind an interface. The current Google API key does not expose embedding models, so the live path uses improved keyword search.
-
 ---
 
 ## What was left out on purpose
 
-- Production vector search (provider limitation)
-- Polished UI (API + Swagger first)
-- Fancy credit-memo wording (structured memo from code is enough)
-- Hybrid BM25 + vector, re-ranking (stretch)
+- Production vector search (provider limitation; keyword search is the live path)
+- Docker Compose and formal SQL-style migrations (MongoDB + seed scripts instead)
+- Hybrid BM25 + vector and re-ranking (stretch)
+- Fancy free-form credit-memo wording (structured memo from code is enough)
+- Token/cost tracking per user
 
 ## What we would add with more time
 
-- Better PDF clause reconstruction
-- Working embeddings + hybrid retrieval
-- Full OpenAPI coverage for every route
-- Minimal web UI for assess / approve
+- Better PDF clause reconstruction so exact policy numbers stay in one chunk
+- Working embeddings + hybrid retrieval, with before/after eval numbers
+- Real LLM extractor behind the same interface (keep FakeExtractor for offline tests)
 - Token and cost tracking per user
+- Optional: offer letter PDF after status becomes Issued

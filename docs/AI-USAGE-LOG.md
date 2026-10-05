@@ -8,7 +8,7 @@
 
 ### 2026-09-29
 
-**Tool:** Grok / ChatGPT  
+**Tool:** Grok / Copilot 
 **What I asked:**  
 Help bootstrap Node + Express + MongoDB Atlas project structure and calculation engine.
 
