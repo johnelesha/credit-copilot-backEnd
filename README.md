@@ -18,6 +18,8 @@ Nothing in this project is real lending policy or financial advice.
 cd backend
 npm install
 
+copy .env.example to .env file with the changes
+
 npm run seed:policy
 npm run seed:applications
 npm run seed:users
